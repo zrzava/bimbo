@@ -16,8 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const blogs = ["bimbois.tumblr.com"];
     let allPhotos = [];
     let loadedPhotos = 0;
-    const photosPerLoad = 20;
+    const photosPerLoad = 20; // Počet fotek na jednu dávku
     let isLoading = false;
+    let totalFetched = 0; // Počet už načtených fotek
 
     // Funkce pro aktualizaci titulku stránky
     function updatePageTitle() {
@@ -89,11 +90,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             let responses = await Promise.all(
-                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=20`))
+                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=${photosPerLoad}&offset=${totalFetched}`))
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
-            allPhotos = data.flatMap(blogData => blogData.response.posts.flatMap(extractImages));
+            data.forEach(blogData => {
+                const newPhotos = blogData.response.posts.flatMap(extractImages);
+                allPhotos.push(...newPhotos);
+            });
+
+            totalFetched += data[0].response.posts.length;
 
             updateFilters();
             displayPhotos();
