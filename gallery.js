@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
         visiblePhotos.forEach(photo => {
             let img = document.createElement("img");
             img.src = photo.url;
-            img.loading = "lazy";
+            img.loading = "lazy"; // Lazy loading fotky
             img.alt = `Photo from #${tagFilter}`;
             img.classList.add("gallery-image");
             img.addEventListener("click", () => {
@@ -151,13 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         loadedPhotos += photosPerLoad;
-
-        if (loadedPhotos < getFilteredPhotos().length) {
-            let showMoreButton = document.createElement("button");
-            showMoreButton.textContent = "Show more";
-            showMoreButton.addEventListener("click", displayPhotos);
-            galleryContainer.appendChild(showMoreButton);
-        }
     }
 
     // Funkce pro otevření modálního okna
@@ -219,6 +212,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const nextIndex = (currentIndex + 1) % visiblePhotos.length;
         openModal(visiblePhotos[nextIndex].url, nextIndex);
     }
+
+    // Debounce pro efektivní scrollování
+    let debounceTimer;
+    function onScroll() {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+            if (loadedPhotos < getFilteredPhotos().length && !isLoading) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    displayPhotos(); // Načíst další fotky s debounce
+                }, 200);
+            }
+        }
+    }
+
+    // Přidání scroll listeneru
+    window.addEventListener("scroll", onScroll);
 
     // Načítání dat
     fetchTumblrPhotos();
