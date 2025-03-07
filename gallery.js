@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             let responses = await Promise.all(
-                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YOUR_API_KEY&limit=20`))
+                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=20`))
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
