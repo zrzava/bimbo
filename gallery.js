@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function extractImages(post) {
         let photos = [];
 
-        // Pokud příspěvek obsahuje fotky, přidej je
         if (post.photos) {
             post.photos.forEach(photo => {
                 photos.push({
@@ -58,7 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // Pokud příspěvek obsahuje obrázky v těle textu
         if (post.body) {
             let regex = /<img[^>]+src="([^">]+)"/g;
             let match;
@@ -71,7 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Pokud je příspěvek reblog, přidej i obrázky z reblogu
         if (post.reblogged_from_post && post.reblogged_from_post.photos) {
             post.reblogged_from_post.photos.forEach(photo => {
                 photos.push({
@@ -96,11 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
-            console.log("📡 API response:", JSON.stringify(data, null, 2));
-
             allPhotos = data.flatMap(blogData => blogData.response.posts.flatMap(extractImages));
-
-            console.log("✅ Photos fetched:", allPhotos);
 
             updateFilters();
             displayPhotos();
@@ -133,7 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Přidání odkazu na Gabbie's Photos
         let gabbieLink = document.createElement("a");
         gabbieLink.href = "https://zrzava.com/?shop=pictures";
         gabbieLink.textContent = "Gabbie's Photos";
@@ -152,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
             img.alt = `Photo from #${tagFilter}`;
             img.classList.add("gallery-image");
             img.addEventListener("click", () => {
-                openModal(photo.url); // Otevření modálního okna při kliknutí na fotku
+                openModal(photo.url, visiblePhotos.indexOf(photo)); // Otevření modálního okna při kliknutí na fotku
             });
 
             galleryContainer.appendChild(img);
@@ -169,13 +161,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Funkce pro otevření modálního okna
-    function openModal(imageUrl) {
+    function openModal(imageUrl, currentIndex) {
         const modal = document.getElementById("photo-modal");
         const modalImage = document.getElementById("modal-image");
         const closeModal = document.getElementById("close-modal");
 
-        modalImage.src = imageUrl; // Nastavení URL fotky do modálního okna
-        modal.style.display = "block"; // Zobrazení modálního okna
+        modalImage.src = imageUrl;
+        modal.style.display = "block";
+        
+        // Nastavení maximální výšky fotky na 90vh
+        modalImage.style.maxHeight = "90vh";
+        modalImage.style.objectFit = "contain"; // Ujistí se, že fotka nebude deformována
 
         // Zavření modálního okna při kliknutí na křížek
         closeModal.addEventListener("click", () => {
@@ -188,6 +184,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 modal.style.display = "none";
             }
         });
+
+        // Posun na předchozí nebo následující fotku při kliknutí na okraj
+        modalImage.addEventListener("click", (event) => {
+            if (event.offsetX < modalImage.width / 2) {
+                showPreviousPhoto(currentIndex); // Levý okraj pro předchozí fotku
+            } else {
+                showNextPhoto(currentIndex); // Pravý okraj pro další fotku
+            }
+        });
+
+        // Posun na předchozí nebo následující fotku pomocí kláves
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft") {
+                showPreviousPhoto(currentIndex);
+            } else if (event.key === "ArrowRight") {
+                showNextPhoto(currentIndex);
+            } else if (event.key === "Escape") {
+                modal.style.display = "none"; // Zavření okna při Escape
+            }
+        });
+    }
+
+    // Funkce pro zobrazení předchozí fotky
+    function showPreviousPhoto(currentIndex) {
+        const visiblePhotos = getFilteredPhotos();
+        const previousIndex = (currentIndex - 1 + visiblePhotos.length) % visiblePhotos.length;
+        openModal(visiblePhotos[previousIndex].url, previousIndex);
+    }
+
+    // Funkce pro zobrazení další fotky
+    function showNextPhoto(currentIndex) {
+        const visiblePhotos = getFilteredPhotos();
+        const nextIndex = (currentIndex + 1) % visiblePhotos.length;
+        openModal(visiblePhotos[nextIndex].url, nextIndex);
     }
 
     // Načítání dat
