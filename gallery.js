@@ -139,8 +139,15 @@ function openModal(imageUrl, currentIndex) {
     modalImage.style.width = "auto"; // Šířka se přizpůsobí, aby byl zachován poměr stran
     modalImage.style.objectFit = "contain"; // Fotka se přizpůsobí bez deformace
 
-    // Centrování fotky do středu okna
-    modalImage.style.margin = "auto"; // Vycentrování horizontálně i vertikálně
+    // Nastavení display na block a centrování fotky
+    modalImage.style.display = "block"; // Zajištění, že fotka je blokový prvek pro centrování
+    modalImage.style.marginLeft = "auto"; // Vycentrování horizontálně
+    modalImage.style.marginRight = "auto"; // Vycentrování horizontálně
+    modalImage.style.marginTop = "auto"; // Vycentrování vertikálně
+    modalImage.style.marginBottom = "auto"; // Vycentrování vertikálně
+    modalImage.style.position = "absolute"; // Absolutní pozicování pro centrování
+    modalImage.style.top = "50%"; // Vertikální centrování
+    modalImage.style.transform = "translateY(-50%)"; // Posunutí pro perfektní centrování
 
     // Zavření modálního okna při kliknutí na křížek
     closeModal.addEventListener("click", () => {
@@ -174,6 +181,7 @@ function openModal(imageUrl, currentIndex) {
         }
     });
 }
+
 
     // Debounce pro efektivní posouvání mezi fotkami
     let debounceTimerModal;
