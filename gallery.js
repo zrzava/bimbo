@@ -15,11 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const blogs = ["bimbois.tumblr.com"];
     let allPhotos = [];
+    let filteredPhotos = [];
     let loadedPhotos = 0;
     const photosPerLoad = 20;
     let isLoading = false;
     let currentPage = 1; // Tracking current page for pagination
-    let tagPhotoCount = {}; // Object to store the count of photos for each tag
 
     // Funkce pro aktualizaci titulku stránky
     function updatePageTitle() {
@@ -99,13 +99,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 blogData.response.posts.forEach(post => {
                     const photos = extractImages(post);
                     allPhotos.push(...photos);
-                    post.tags.forEach(tag => {
-                        if (!tagPhotoCount[tag]) tagPhotoCount[tag] = 0;
-                        tagPhotoCount[tag] += photos.length;
-                    });
                 });
             });
 
+            // Filtrování fotek podle aktuálního filtru
+            filteredPhotos = getFilteredPhotos();
             updateFilters();
             displayPhotos();
             updatePageTitle();
@@ -123,18 +121,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return allPhotos.filter(photo => photo.tags.includes(tagFilter));
     }
 
-    // Zobrazení filtrů s počtem fotek
+    // Zobrazení filtrů
     function updateFilters() {
         filtersContainer.innerHTML = "";
         Object.keys(hashtags).forEach(tag => {
-            const count = tagPhotoCount[tag] || 0; // Počet fotek pro filtr
-            if (count > 0) {
-                let filterLink = document.createElement("a");
-                filterLink.href = `index.html?tag=${tag}`;
-                filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count})`; // Zobrazí všechny fotky pro daný filtr
-                filtersContainer.appendChild(filterLink);
-                filtersContainer.appendChild(document.createTextNode(" • "));
-            }
+            let filterLink = document.createElement("a");
+            filterLink.href = `index.html?tag=${tag}`;
+            filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)}`; // Zobrazí tag
+            filtersContainer.appendChild(filterLink);
+            filtersContainer.appendChild(document.createTextNode(" • "));
         });
 
         let gabbieLink = document.createElement("a");
@@ -147,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function displayPhotos() {
         galleryContainer.innerHTML = "";
 
-        const visiblePhotos = getFilteredPhotos().slice(0, loadedPhotos + photosPerLoad);
+        const visiblePhotos = filteredPhotos.slice(0, loadedPhotos + photosPerLoad);
         visiblePhotos.forEach(photo => {
             let img = document.createElement("img");
             img.src = photo.url;
@@ -228,14 +223,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Funkce pro zobrazení předchozí fotky
     function showPreviousPhoto(currentIndex) {
-        const visiblePhotos = getFilteredPhotos();
+        const visiblePhotos = filteredPhotos;
         const previousIndex = (currentIndex - 1 + visiblePhotos.length) % visiblePhotos.length;
         openModal(visiblePhotos[previousIndex].url, previousIndex);
     }
 
     // Funkce pro zobrazení další fotky
     function showNextPhoto(currentIndex) {
-        const visiblePhotos = getFilteredPhotos();
+        const visiblePhotos = filteredPhotos;
         const nextIndex = (currentIndex + 1) % visiblePhotos.length;
         openModal(visiblePhotos[nextIndex].url, nextIndex);
     }
@@ -244,9 +239,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let debounceTimer;
     function onScroll() {
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-            if (loadedPhotos < getFilteredPhotos().length && !isLoading) {
+            if (loadedPhotos < filteredPhotos.length && !isLoading) {
                 currentPage++;
-                fetchTumblrPhotos(currentPage); // Načíst další fotky pro novou stránku
+                fetchTumblrPhotos(currentPage); // Načíst další fotky pro novou stránku, které odpovídají filtru
             }
         }
     }
