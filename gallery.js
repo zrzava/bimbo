@@ -20,7 +20,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const photosPerLoad = 20;
     let isLoading = false;
     let currentPage = 1; // Tracking current page for pagination
-    let loadAutomatically = false; // Flag to track if we should load photos automatically
+    let canLoadMore = false; // Flag to control automatic loading after "Show more" click
+
+    // Funkce pro aktualizaci titulku stránky
+    function updatePageTitle() {
+        if (photoId && tagFilter) {
+            document.title = `Photo from #${tagFilter} on Zrzava.com`;
+        } else if (tagFilter) {
+            document.title = `Gallery of #${tagFilter} on Zrzava.com`;
+        } else {
+            document.title = `Gallery on Zrzava.com`;
+        }
+    }
+
+    // Funkce pro aktualizaci meta tagů
+    function updateMetaTags() {
+        const metaDescription = document.querySelector("meta[name='description']");
+        const metaKeywords = document.querySelector("meta[name='keywords']");
+        if (hashtags[tagFilter]) {
+            metaDescription.content = hashtags[tagFilter].description;
+            metaKeywords.content = hashtags[tagFilter].keywords;
+        } else {
+            metaDescription.content = "Explore beautiful bimbo galleries on Zrzava.com.";
+            metaKeywords.content = "gallery, photos, fashion, lifestyle";
+        }
+    }
 
     // Funkce pro extrakci obrázků z příspěvků
     function extractImages(post) {
@@ -136,10 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loadedPhotos += photosPerLoad;
 
         // Pokud už byly všechny fotky načteny, přidáme "Show more" tlačítko
-        if (loadedPhotos < filteredPhotos.length && !loadAutomatically) {
+        if (loadedPhotos < filteredPhotos.length) {
             showShowMoreButton();
-        } else if (loadedPhotos < filteredPhotos.length) {
-            autoLoadMorePhotos();
         }
     }
 
@@ -152,15 +174,92 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showMoreButton.addEventListener("click", () => {
             currentPage++;
-            loadAutomatically = true; // Po kliknutí nastavíme automatické načítání
+            canLoadMore = true; // Povolit automatické načítání fotek při scrollování
             fetchTumblrPhotos(currentPage);
             showMoreButton.remove(); // Smažeme tlačítko, jakmile klikneme
         });
     }
 
-    // Funkce pro automatické načítání fotek při scrollování
-    function autoLoadMorePhotos() {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+    // Funkce pro otevření modálního okna
+    function openModal(imageUrl, currentIndex) {
+        const modal = document.getElementById("photo-modal");
+        const modalImage = document.getElementById("modal-image");
+        const closeModal = document.getElementById("close-modal");
+
+        modalImage.src = imageUrl;
+        modal.style.display = "block";
+        
+        // Nastavení maximální výšky fotky na 90vh
+        modalImage.style.maxHeight = "90vh";
+        modalImage.style.objectFit = "contain"; // Ujistí se, že fotka nebude deformována
+
+        // Zavření modálního okna při kliknutí na křížek
+        closeModal.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        // Zavření modálního okna při kliknutí mimo okno
+        window.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+        // Posun na předchozí nebo následující fotku při kliknutí na okraj
+        modalImage.addEventListener("click", (event) => {
+            if (event.offsetX < modalImage.width / 2) {
+                debounceMovePhoto(currentIndex, "prev"); // Levý okraj pro předchozí fotku
+            } else {
+                debounceMovePhoto(currentIndex, "next"); // Pravý okraj pro další fotku
+            }
+        });
+
+        // Posun na předchozí nebo následující fotku pomocí kláves
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft") {
+                debounceMovePhoto(currentIndex, "prev");
+            } else if (event.key === "ArrowRight") {
+                debounceMovePhoto(currentIndex, "next");
+            } else if (event.key === "Escape") {
+                modal.style.display = "none"; // Zavření okna při Escape
+            }
+        });
+    }
+
+    // Debounce pro efektivní posouvání mezi fotkami
+    let debounceTimerModal;
+    const debounceDelay = 200; // Časová prodleva mezi změnami fotek
+
+    function debounceMovePhoto(currentIndex, direction) {
+        clearTimeout(debounceTimerModal); // Zastavit předchozí volání
+
+        debounceTimerModal = setTimeout(() => {
+            if (direction === "prev") {
+                showPreviousPhoto(currentIndex); // Zobrazení předchozí fotky
+            } else if (direction === "next") {
+                showNextPhoto(currentIndex); // Zobrazení následující fotky
+            }
+        }, debounceDelay); // Prodleva mezi akcemi
+    }
+
+    // Funkce pro zobrazení předchozí fotky
+    function showPreviousPhoto(currentIndex) {
+        const visiblePhotos = filteredPhotos;
+        const previousIndex = (currentIndex - 1 + visiblePhotos.length) % visiblePhotos.length;
+        openModal(visiblePhotos[previousIndex].url, previousIndex);
+    }
+
+    // Funkce pro zobrazení další fotky
+    function showNextPhoto(currentIndex) {
+        const visiblePhotos = filteredPhotos;
+        const nextIndex = (currentIndex + 1) % visiblePhotos.length;
+        openModal(visiblePhotos[nextIndex].url, nextIndex);
+    }
+
+    // Debounce pro efektivní scrollování
+    let debounceTimer;
+    function onScroll() {
+        if (canLoadMore && window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
             if (loadedPhotos < filteredPhotos.length && !isLoading) {
                 currentPage++;
                 fetchTumblrPhotos(currentPage); // Načíst další fotky pro novou stránku, které odpovídají filtru
@@ -168,8 +267,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Přidání scroll listeneru pro automatické načítání
-    window.addEventListener("scroll", autoLoadMorePhotos);
+    // Přidání scroll listeneru
+    window.addEventListener("scroll", onScroll);
 
     // Načítání dat
     fetchTumblrPhotos();
