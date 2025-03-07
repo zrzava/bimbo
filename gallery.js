@@ -172,7 +172,15 @@ document.addEventListener("DOMContentLoaded", () => {
     function displaySinglePhoto() {
         if (!photoId) return;
         let photo = allPhotos.find(p => p.id === photoId);
-        if (!photo) return;
+        if (!photo) {
+            // Pokud fotka není nalezena, zkus použít přímou URL z parametru
+            const directPhotoUrl = params.get("photo_url");
+            if (directPhotoUrl) {
+                photo = { url: directPhotoUrl };
+            } else {
+                return;
+            }
+        }
 
         galleryContainer.innerHTML = "";
 
