@@ -168,88 +168,58 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
     // Zobrazení samostatné fotky
-function displaySinglePhoto() {
-    if (!photoId) {
-        console.error("❌ No photoId in URL");
-        return;
+    function displaySinglePhoto() {
+        if (!photoId) {
+            console.error("❌ No photoId in URL");
+            return;
+        }
+
+        console.log("📸 Looking for photo with ID:", photoId);
+
+        let photo = allPhotos.find(p => p.id === photoId);
+
+        if (!photo) {
+            console.error(`❌ Photo with ID ${photoId} not found in allPhotos`);
+            return;
+        }
+
+        console.log("📸 Found photo details:", photo);
+
+        galleryContainer.innerHTML = "";
+
+        let img = document.createElement("img");
+        img.src = photo.url;
+        img.style.maxHeight = "90vh";
+        img.alt = `Photo from #${tagFilter}`;
+        galleryContainer.appendChild(img);
+
+        let navContainer = document.createElement("div");
+        navContainer.classList.add("photo-navigation");
+
+        let backLink = document.createElement("a");
+        backLink.href = `index.html?tag=${tagFilter}`;
+        backLink.textContent = "Back to Gallery";
+        navContainer.appendChild(backLink);
+
+        let prevPhotoIndex = allPhotos.findIndex(p => p.id === photoId) - 1;
+        if (prevPhotoIndex >= 0) {
+            let prevLink = document.createElement("a");
+            prevLink.href = `index.html?tag=${tagFilter}&photo=${allPhotos[prevPhotoIndex].id}`;
+            prevLink.textContent = "← Previous";
+            navContainer.insertBefore(prevLink, backLink);
+        }
+
+        let nextPhotoIndex = allPhotos.findIndex(p => p.id === photoId) + 1;
+        if (nextPhotoIndex < allPhotos.length) {
+            let nextLink = document.createElement("a");
+            nextLink.href = `index.html?tag=${tagFilter}&photo=${allPhotos[nextPhotoIndex].id}`;
+            nextLink.textContent = "Next →";
+            navContainer.appendChild(nextLink);
+        }
+
+        galleryContainer.appendChild(navContainer);
     }
-
-    // Získáme URL fotky z URL parametru (pokud je to URL fotky)
-    const photoUrl = new URLSearchParams(window.location.search).get('photoUrl');
-    if (!photoUrl) {
-        console.error("❌ No photoUrl found in URL");
-        return;
-    }
-
-    // Zkontroluj URL fotky
-    console.log("📸 Displaying photo from URL:", photoUrl);
-
-    // Vymazání obsahu galerie
-    galleryContainer.innerHTML = "";
-
-    // Vytvoření img elementu pro zobrazení fotky
-    let img = document.createElement("img");
-    img.src = photoUrl;  // Používáme URL fotky přímo z URL parametrů
-    img.style.maxHeight = "90vh";
-    img.alt = "Photo";
-    galleryContainer.appendChild(img);
-
-    // Vytvoření navigace
-    let navContainer = document.createElement("div");
-    navContainer.classList.add("photo-navigation");
-
-    // Odkaz zpět do galerie
-    let backLink = document.createElement("a");
-    backLink.href = `index.html?tag=${tagFilter}`;
-    backLink.textContent = "Back to Gallery";
-    navContainer.appendChild(backLink);
-
-    // Odkaz na předchozí fotku
-    let prevPhoto = allPhotos[allPhotos.findIndex(p => p.url === photoUrl) - 1];
-    if (prevPhoto) {
-        let prevLink = document.createElement("a");
-        prevLink.href = `index.html?tag=${tagFilter}&photo=${prevPhoto.id}`;
-        prevLink.textContent = "← Previous";
-        navContainer.insertBefore(prevLink, backLink);
-    }
-
-    // Odkaz na následující fotku
-    let nextPhoto = allPhotos[allPhotos.findIndex(p => p.url === photoUrl) + 1];
-    if (nextPhoto) {
-        let nextLink = document.createElement("a");
-        nextLink.href = `index.html?tag=${tagFilter}&photo=${nextPhoto.id}`;
-        nextLink.textContent = "Next →";
-        navContainer.appendChild(nextLink);
-    }
-
-    // Přidání navigace do galerie
-    galleryContainer.appendChild(navContainer);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Debounce pro scrollování
     let debounceTimer;
@@ -264,7 +234,6 @@ function displaySinglePhoto() {
         }, 200);
     });
 
-    // Načítání dat
     if (photoId) {
         displaySinglePhoto();
     } else {
