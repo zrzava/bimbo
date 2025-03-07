@@ -85,6 +85,52 @@ button:hover {
     font-weight: bold;
 }
 
+#photo-viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden; /* Skryté, dokud se neotevře */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+#photo-viewer.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+#photo-viewer img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+}
+
+.photo-navigation {
+    position: absolute;
+    bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    color: white;
+}
+
+.thumbnail {
+    width: 100%;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.photo-item {
+    margin: 10px;
+}
+
+
 .photo-navigation a:hover {
     text-decoration: underline;
 }
