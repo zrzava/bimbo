@@ -161,20 +161,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         modalImage.src = imageUrl;
         modal.style.display = "block";
-        
-        // Nastavení maximální výšky fotky na 90vh
-        modalImage.style.maxHeight = "90vh";
+
+        // Nastavení maximální výšky fotky na 95vh a její centrování
+        modalImage.style.maxHeight = "95vh";
         modalImage.style.objectFit = "contain"; // Ujistí se, že fotka nebude deformována
+        modal.style.display = "flex"; // Nastaví modální okno do flexboxu pro centrování fotky
+        modal.style.alignItems = "center"; // Vertikální centrování
+        modal.style.justifyContent = "center"; // Horizontální centrování
+
+        // Změna URL v prohlížeči s ID fotky
+        history.pushState(null, "", `?photo=${currentIndex}`);
 
         // Zavření modálního okna při kliknutí na křížek
         closeModal.addEventListener("click", () => {
             modal.style.display = "none";
+            history.pushState(null, "", window.location.pathname); // Reset URL při zavření okna
         });
 
         // Zavření modálního okna při kliknutí mimo okno
         window.addEventListener("click", (event) => {
             if (event.target === modal) {
                 modal.style.display = "none";
+                history.pushState(null, "", window.location.pathname); // Reset URL při zavření okna
             }
         });
 
@@ -195,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 debounceMovePhoto(currentIndex, "next");
             } else if (event.key === "Escape") {
                 modal.style.display = "none"; // Zavření okna při Escape
+                history.pushState(null, "", window.location.pathname); // Reset URL při zavření okna
             }
         });
     }
