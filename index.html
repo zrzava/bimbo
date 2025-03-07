@@ -12,19 +12,14 @@
 
     <h1 id="gallery-title">Gallery</h1>
     <p id="gallery-description">Explore the latest photos from the gallery.</p>
-    <p id="gallery-updated">Last updated: <span id="last-updated">YYYY-MM-DD HH:MM UTC</span></p>
 
     <nav id="filters"></nav>
 
     <main id="gallery"></main>
 
-    <div id="photo-viewer" class="hidden">
-        <img id="photo-full" src="" alt="Photo">
-        <div class="photo-navigation">
-            <a id="prev-photo" href="#">← Previous</a>
-            <a id="back-to-gallery" href="gallery.html">Back to Gallery</a>
-            <a id="next-photo" href="#">Next →</a>
-        </div>
+    <div id="photo-modal" class="modal">
+    <span id="close-modal" class="close">&times;</span>
+    <img id="modal-image" class="modal-content">
     </div>
 
     <script src="gallery.js"></script>
