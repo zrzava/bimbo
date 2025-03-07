@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const filtersContainer = document.getElementById("filters");
     const params = new URLSearchParams(window.location.search);
     const tagFilter = params.get("tag") || "";
-    const photoId = params.get("photo") || "";
 
     const blogs = ["bimbois.tumblr.com"];
     let allPhotos = [];
@@ -11,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const photosPerLoad = 20;
     let isLoading = false;
 
-    // Načtení fotek z Tumblr API
+    // 📡 Fetch Tumblr posts
     async function fetchTumblrPhotos() {
         if (isLoading) return;
         isLoading = true;
@@ -22,38 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
-            allPhotos = data.flatMap(blogData =>
-                (blogData.response?.posts || []).flatMap(post => {
-                    let images = [];
+            console.log("📡 API response:", JSON.stringify(data, null, 2));
 
-                    // 1️⃣ Fotky z "photos" příspěvků
-                    if (post.type === "photo" && post.photos) {
-                        images.push(
-                            ...post.photos.map(photo => ({
-                                id: post.id,
-                                url: photo.original_size.url,
-                                tags: post.tags || []
-                            }))
-                        );
-                    }
-
-                    // 2️⃣ Extrakce obrázků z HTML obsahu "body"
-                    if (post.body) {
-                        let matches = [...post.body.matchAll(/<img.*?src=["'](.*?)["']/g)];
-                        images.push(
-                            ...matches.map(match => ({
-                                id: post.id,
-                                url: match[1],
-                                tags: post.tags || []
-                            }))
-                        );
-                    }
-
-                    return images;
-                })
-            );
+            allPhotos = data.flatMap(blogData => blogData.response.posts.flatMap(extractImages));
 
             console.log("✅ Photos fetched:", allPhotos);
+
             displayPhotos();
         } catch (error) {
             console.error("❌ Error fetching Tumblr data:", error);
@@ -62,7 +35,48 @@ document.addEventListener("DOMContentLoaded", () => {
         isLoading = false;
     }
 
-    // Zobrazení fotek v galerii
+    // 📷 Extract images from different post sources
+    function extractImages(post) {
+        let images = [];
+
+        // 1️⃣ Standardní fotky v `photos`
+        if (post.photos) {
+            images.push(...post.photos.map(photo => ({
+                id: post.id,
+                url: photo.original_size.url
+            })));
+        }
+
+        // 2️⃣ Fotky z `body` (HTML parsing)
+        if (post.body) {
+            let imgMatches = post.body.match(/<img.*?src=["'](.*?)["']/g);
+            if (imgMatches) {
+                images.push(...imgMatches.map(imgTag => ({
+                    id: post.id,
+                    url: imgTag.match(/src=["'](.*?)["']/)[1]
+                })));
+            }
+        }
+
+        // 3️⃣ Fotky z `trail` (reblogy)
+        if (post.trail) {
+            post.trail.forEach(trailItem => {
+                if (trailItem.content) {
+                    let imgMatches = trailItem.content.match(/<img.*?src=["'](.*?)["']/g);
+                    if (imgMatches) {
+                        images.push(...imgMatches.map(imgTag => ({
+                            id: post.id,
+                            url: imgTag.match(/src=["'](.*?)["']/)[1]
+                        })));
+                    }
+                }
+            });
+        }
+
+        return images;
+    }
+
+    // 🖼 Zobrazení fotek
     function displayPhotos() {
         galleryContainer.innerHTML = "";
 
@@ -71,12 +85,19 @@ document.addEventListener("DOMContentLoaded", () => {
             let img = document.createElement("img");
             img.src = photo.url;
             img.loading = "lazy";
-            img.alt = "Tumblr Photo";
             img.classList.add("gallery-image");
+
             galleryContainer.appendChild(img);
         });
 
         loadedPhotos += photosPerLoad;
+
+        if (loadedPhotos < allPhotos.length) {
+            let showMoreButton = document.createElement("button");
+            showMoreButton.textContent = "Show more";
+            showMoreButton.addEventListener("click", displayPhotos);
+            galleryContainer.appendChild(showMoreButton);
+        }
     }
 
     fetchTumblrPhotos();
