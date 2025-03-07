@@ -13,7 +13,7 @@
         "details": { description: "Close-up shots and detailed captures.", keywords: "details, fashion, accessories" }
     };
 
-    const blogs = ["https://bimbois.tumblr.com", "yourblog2", "yourblog3"];
+    const blogs = ["bimbois.tumblr.com"];
     let allPhotos = [];
     let loadedPhotos = 0;
     const photosPerLoad = 20;
@@ -87,7 +87,7 @@
             const count = allPhotos.filter(photo => photo.tags.includes(tag)).length;
             if (count > 0) {
                 let filterLink = document.createElement("a");
-                filterLink.href = `gallery.html?tag=${tag}`;
+                filterLink.href = `index.html?tag=${tag}`;
                 filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count})`;
                 filtersContainer.appendChild(filterLink);
                 filtersContainer.appendChild(document.createTextNode(" • "));
@@ -113,7 +113,7 @@
             img.alt = `Photo from #${tagFilter}`;
             img.classList.add("gallery-image");
             img.addEventListener("click", () => {
-                window.location.href = `gallery.html?tag=${tagFilter}&photo=${photo.id}`;
+                window.location.href = `index.html?tag=${tagFilter}&photo=${photo.id}`;
             });
 
             galleryContainer.appendChild(img);
@@ -147,14 +147,14 @@
         navContainer.classList.add("photo-navigation");
 
         let backLink = document.createElement("a");
-        backLink.href = `gallery.html?tag=${tagFilter}`;
+        backLink.href = `index.html?tag=${tagFilter}`;
         backLink.textContent = "Back to Gallery";
         navContainer.appendChild(backLink);
 
         let prevPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) - 1];
         if (prevPhoto) {
             let prevLink = document.createElement("a");
-            prevLink.href = `gallery.html?tag=${tagFilter}&photo=${prevPhoto.id}`;
+            prevLink.href = `index.html?tag=${tagFilter}&photo=${prevPhoto.id}`;
             prevLink.textContent = "← Previous";
             navContainer.insertBefore(prevLink, backLink);
         }
@@ -162,7 +162,7 @@
         let nextPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) + 1];
         if (nextPhoto) {
             let nextLink = document.createElement("a");
-            nextLink.href = `gallery.html?tag=${tagFilter}&photo=${nextPhoto.id}`;
+            nextLink.href = `index.html?tag=${tagFilter}&photo=${nextPhoto.id}`;
             nextLink.textContent = "Next →";
             navContainer.appendChild(nextLink);
         }
