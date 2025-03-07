@@ -110,19 +110,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Funkce pro zobrazení tlačítka "Show more"
-    function showShowMoreButton() {
-        let showMoreButton = document.createElement("button");
-        showMoreButton.textContent = "Show more";
-        showMoreButton.classList.add("show-more-button");
-        galleryContainer.appendChild(showMoreButton);
+function showShowMoreButton() {
+    let showMoreContainer = document.getElementById("show-more-container");
 
-        showMoreButton.addEventListener("click", () => {
-            currentPage++;
-            canLoadMore = true; // Povolit automatické načítání fotek při scrollování
-            fetchTumblrPhotos(currentPage);
-            showMoreButton.remove(); // Smažeme tlačítko, jakmile klikneme
-        });
+    // Pokud kontejner ještě neexistuje, vytvoříme ho
+    if (!showMoreContainer) {
+        showMoreContainer = document.createElement("div");
+        showMoreContainer.id = "show-more-container";
+        showMoreContainer.style.textAlign = "center"; // Centrovat tlačítko
+        showMoreContainer.style.marginTop = "20px";
+        document.body.appendChild(showMoreContainer); // Přidáme na konec stránky
     }
+
+    let showMoreButton = document.createElement("button");
+    showMoreButton.textContent = "Show More";
+    showMoreButton.classList.add("show-more-button");
+    showMoreButton.style.padding = "10px 20px";
+    showMoreButton.style.fontSize = "16px";
+    showMoreButton.style.cursor = "pointer";
+
+    showMoreContainer.appendChild(showMoreButton);
+
+    showMoreButton.addEventListener("click", () => {
+        currentPage++;
+        canLoadMore = true; // Povolit automatické načítání
+        fetchTumblrPhotos(currentPage);
+        showMoreButton.remove(); // Po kliknutí tlačítko odstraníme
+    });
+}
+
 
     // Funkce pro otevření modálního okna
 function openModal(imageUrl, currentIndex) {
