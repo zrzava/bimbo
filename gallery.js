@@ -113,11 +113,17 @@ document.addEventListener("DOMContentLoaded", () => {
         isLoading = false;
     }
 
+    // Filtrování fotek podle tagu
+    function getFilteredPhotos() {
+        if (!tagFilter) return allPhotos;
+        return allPhotos.filter(photo => photo.tags.includes(tagFilter));
+    }
+
     // Zobrazení filtrů s počtem fotek
     function updateFilters() {
         filtersContainer.innerHTML = "";
         Object.keys(hashtags).forEach(tag => {
-            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length;
+            const count = getFilteredPhotos().filter(photo => photo.tags.includes(tag)).length;
             if (count > 0) {
                 let filterLink = document.createElement("a");
                 filterLink.href = `index.html?tag=${tag}`;
@@ -138,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function displayPhotos() {
         galleryContainer.innerHTML = "";
 
-        const visiblePhotos = allPhotos.slice(0, loadedPhotos + photosPerLoad);
+        const visiblePhotos = getFilteredPhotos().slice(0, loadedPhotos + photosPerLoad);
         visiblePhotos.forEach(photo => {
             let img = document.createElement("img");
             img.src = photo.url;
@@ -154,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         loadedPhotos += photosPerLoad;
 
-        if (loadedPhotos < allPhotos.length) {
+        if (loadedPhotos < getFilteredPhotos().length) {
             let showMoreButton = document.createElement("button");
             showMoreButton.textContent = "Show more";
             showMoreButton.addEventListener("click", displayPhotos);
@@ -209,11 +215,14 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-                displayPhotos();
+                if (!isLoading) {
+                    displayPhotos();
+                }
             }
         }, 200);
     });
 
+    // Načítání dat
     if (photoId) {
         displaySinglePhoto();
     } else {
