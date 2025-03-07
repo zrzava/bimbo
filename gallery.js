@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const photosPerLoad = 20;
     let isLoading = false;
     let currentPage = 1; // Tracking current page for pagination
+    let tagPhotoCount = {}; // Object to store the count of photos for each tag
 
     // Funkce pro aktualizaci titulku stránky
     function updatePageTitle() {
@@ -98,6 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 blogData.response.posts.forEach(post => {
                     const photos = extractImages(post);
                     allPhotos.push(...photos);
+                    post.tags.forEach(tag => {
+                        if (!tagPhotoCount[tag]) tagPhotoCount[tag] = 0;
+                        tagPhotoCount[tag] += photos.length;
+                    });
                 });
             });
 
@@ -122,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateFilters() {
         filtersContainer.innerHTML = "";
         Object.keys(hashtags).forEach(tag => {
-            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length; // Počet fotek pro filtr
+            const count = tagPhotoCount[tag] || 0; // Počet fotek pro filtr
             if (count > 0) {
                 let filterLink = document.createElement("a");
                 filterLink.href = `index.html?tag=${tag}`;
