@@ -181,22 +181,38 @@ document.addEventListener("DOMContentLoaded", () => {
         // Posun na předchozí nebo následující fotku při kliknutí na okraj
         modalImage.addEventListener("click", (event) => {
             if (event.offsetX < modalImage.width / 2) {
-                showPreviousPhoto(currentIndex); // Levý okraj pro předchozí fotku
+                debounceMovePhoto(currentIndex, "prev"); // Levý okraj pro předchozí fotku
             } else {
-                showNextPhoto(currentIndex); // Pravý okraj pro další fotku
+                debounceMovePhoto(currentIndex, "next"); // Pravý okraj pro další fotku
             }
         });
 
         // Posun na předchozí nebo následující fotku pomocí kláves
         window.addEventListener("keydown", (event) => {
             if (event.key === "ArrowLeft") {
-                showPreviousPhoto(currentIndex);
+                debounceMovePhoto(currentIndex, "prev");
             } else if (event.key === "ArrowRight") {
-                showNextPhoto(currentIndex);
+                debounceMovePhoto(currentIndex, "next");
             } else if (event.key === "Escape") {
                 modal.style.display = "none"; // Zavření okna při Escape
             }
         });
+    }
+
+    // Debounce pro efektivní posouvání mezi fotkami
+    let debounceTimerModal;
+    const debounceDelay = 200; // Časová prodleva mezi změnami fotek
+
+    function debounceMovePhoto(currentIndex, direction) {
+        clearTimeout(debounceTimerModal); // Zastavit předchozí volání
+
+        debounceTimerModal = setTimeout(() => {
+            if (direction === "prev") {
+                showPreviousPhoto(currentIndex); // Zobrazení předchozí fotky
+            } else if (direction === "next") {
+                showNextPhoto(currentIndex); // Zobrazení následující fotky
+            }
+        }, debounceDelay); // Prodleva mezi akcemi
     }
 
     // Funkce pro zobrazení předchozí fotky
