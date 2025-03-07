@@ -19,23 +19,46 @@ document.addEventListener("DOMContentLoaded", () => {
     const photosPerLoad = 20;
     let isLoading = false;
 
+    // Funkce pro aktualizaci titulku stránky
+    function updatePageTitle() {
+        if (photoId && tagFilter) {
+            document.title = `Photo from #${tagFilter} on Zrzava.com`;
+        } else if (tagFilter) {
+            document.title = `Gallery of #${tagFilter} on Zrzava.com`;
+        } else {
+            document.title = `Gallery on Zrzava.com`;
+        }
+    }
+
+    // Funkce pro aktualizaci meta tagů
+    function updateMetaTags() {
+        const metaDescription = document.querySelector("meta[name='description']");
+        const metaKeywords = document.querySelector("meta[name='keywords']");
+        if (hashtags[tagFilter]) {
+            metaDescription.content = hashtags[tagFilter].description;
+            metaKeywords.content = hashtags[tagFilter].keywords;
+        } else {
+            metaDescription.content = "Explore beautiful bimbo galleries on Zrzava.com.";
+            metaKeywords.content = "gallery, photos, fashion, lifestyle";
+        }
+    }
+
     // Funkce pro extrakci obrázků z příspěvků
     function extractImages(post) {
         let photos = [];
 
-        // Pokud příspěvek obsahuje fotky z photo (hlavní fotky)
+        // Pokud příspěvek obsahuje fotky, přidej je
         if (post.photos) {
             post.photos.forEach(photo => {
                 photos.push({
                     id: post.id,
                     url: photo.original_size.url,
-                    source: 'photo', // přidáno pro označení, že jde o hlavní fotku
                     tags: post.tags
                 });
             });
         }
 
-        // Pokud příspěvek obsahuje obrázky v těle textu (body)
+        // Pokud příspěvek obsahuje obrázky v těle textu
         if (post.body) {
             let regex = /<img[^>]+src="([^">]+)"/g;
             let match;
@@ -43,19 +66,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 photos.push({
                     id: post.id,
                     url: match[1],
-                    source: 'body', // označení, že fotka je z těla
                     tags: post.tags
                 });
             }
         }
 
-        // Pokud je příspěvek reblog, přidej fotky z reblogu
+        // Pokud je příspěvek reblog, přidej i obrázky z reblogu
         if (post.reblogged_from_post && post.reblogged_from_post.photos) {
             post.reblogged_from_post.photos.forEach(photo => {
                 photos.push({
                     id: post.id,
                     url: photo.original_size.url,
-                    source: 'reblog', // označení, že fotka pochází z reblogu
                     tags: post.tags
                 });
             });
@@ -92,48 +113,145 @@ document.addEventListener("DOMContentLoaded", () => {
         isLoading = false;
     }
 
-    // Zobrazení samostatné fotky
-    function displaySinglePhoto() {
-        if (!photoId) return;
-        let photo = allPhotos.find(p => p.id === photoId);
-        if (!photo) return;
+    // Filtrování fotek podle tagu
+    function getFilteredPhotos() {
+        if (!tagFilter) return allPhotos;
+        return allPhotos.filter(photo => photo.tags.includes(tagFilter));
+    }
 
+    // Zobrazení filtrů s počtem fotek
+    function updateFilters() {
+        filtersContainer.innerHTML = "";
+        Object.keys(hashtags).forEach(tag => {
+            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length;
+            if (count > 0) {
+                let filterLink = document.createElement("a");
+                filterLink.href = `index.html?tag=${tag}`;
+                filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count})`;
+                filtersContainer.appendChild(filterLink);
+                filtersContainer.appendChild(document.createTextNode(" • "));
+            }
+        });
+
+        // Přidání odkazu na Gabbie's Photos
+        let gabbieLink = document.createElement("a");
+        gabbieLink.href = "https://zrzava.com/?shop=pictures";
+        gabbieLink.textContent = "Gabbie's Photos";
+        filtersContainer.appendChild(gabbieLink);
+    }
+
+    // Zobrazení fotek v galerii
+    function displayPhotos() {
         galleryContainer.innerHTML = "";
 
-        let img = document.createElement("img");
-        img.src = photo.url;
-        img.style.maxHeight = "90vh";
-        img.alt = `Photo from #${tagFilter}`;
-        galleryContainer.appendChild(img);
+        const visiblePhotos = getFilteredPhotos().slice(0, loadedPhotos + photosPerLoad);
+        visiblePhotos.forEach(photo => {
+            let img = document.createElement("img");
+            img.src = photo.url;
+            img.loading = "lazy";
+            img.alt = `Photo from #${tagFilter}`;
+            img.classList.add("gallery-image");
+            img.addEventListener("click", () => {
+                window.location.href = `index.html?tag=${tagFilter}&photo=${photo.id}`;
+            });
 
-        let navContainer = document.createElement("div");
-        navContainer.classList.add("photo-navigation");
+            galleryContainer.appendChild(img);
+        });
 
-        let backLink = document.createElement("a");
-        backLink.href = `index.html?tag=${tagFilter}`;
-        backLink.textContent = "Back to Gallery";
-        navContainer.appendChild(backLink);
+        loadedPhotos += photosPerLoad;
 
-        let prevPhotoIndex = allPhotos.findIndex(p => p.id === photoId) - 1;
-        if (prevPhotoIndex >= 0) {
-            let prevPhoto = allPhotos[prevPhotoIndex];
-            let prevLink = document.createElement("a");
-            prevLink.href = `index.html?tag=${tagFilter}&photo=${prevPhoto.id}`;
-            prevLink.textContent = "← Previous";
-            navContainer.insertBefore(prevLink, backLink);
+        if (loadedPhotos < getFilteredPhotos().length) {
+            let showMoreButton = document.createElement("button");
+            showMoreButton.textContent = "Show more";
+            showMoreButton.addEventListener("click", displayPhotos);
+            galleryContainer.appendChild(showMoreButton);
         }
-
-        let nextPhotoIndex = allPhotos.findIndex(p => p.id === photoId) + 1;
-        if (nextPhotoIndex < allPhotos.length) {
-            let nextPhoto = allPhotos[nextPhotoIndex];
-            let nextLink = document.createElement("a");
-            nextLink.href = `index.html?tag=${tagFilter}&photo=${nextPhoto.id}`;
-            nextLink.textContent = "Next →";
-            navContainer.appendChild(nextLink);
-        }
-
-        galleryContainer.appendChild(navContainer);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    // Zobrazení samostatné fotky
+function displaySinglePhoto() {
+    if (!photoId) return;
+
+    // Najít fotku podle ID
+    let photo = allPhotos.find(p => p.id === photoId);
+    if (!photo) return;
+
+    // Vymazat obsah galerie
+    galleryContainer.innerHTML = "";
+
+    // Vytvořit img element pro zobrazení fotky
+    let img = document.createElement("img");
+    img.src = photo.url;  // Zde bude URL fotky, kterou jste získali z Tumblr API nebo přímého URL v body
+    img.style.maxHeight = "90vh";
+    img.alt = `Photo from #${tagFilter}`;
+    galleryContainer.appendChild(img);
+
+    // Vytvoření navigace
+    let navContainer = document.createElement("div");
+    navContainer.classList.add("photo-navigation");
+
+    // Odkaz zpět do galerie
+    let backLink = document.createElement("a");
+    backLink.href = `index.html?tag=${tagFilter}`;
+    backLink.textContent = "Back to Gallery";
+    navContainer.appendChild(backLink);
+
+    // Odkaz na předchozí fotku
+    let prevPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) - 1];
+    if (prevPhoto) {
+        let prevLink = document.createElement("a");
+        prevLink.href = `index.html?tag=${tagFilter}&photo=${prevPhoto.id}`;
+        prevLink.textContent = "← Previous";
+        navContainer.insertBefore(prevLink, backLink);
+    }
+
+    // Odkaz na následující fotku
+    let nextPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) + 1];
+    if (nextPhoto) {
+        let nextLink = document.createElement("a");
+        nextLink.href = `index.html?tag=${tagFilter}&photo=${nextPhoto.id}`;
+        nextLink.textContent = "Next →";
+        navContainer.appendChild(nextLink);
+    }
+
+    // Přidání navigace do galerie
+    galleryContainer.appendChild(navContainer);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+    // Debounce pro scrollování
+    let debounceTimer;
+    window.addEventListener("scroll", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (!isLoading && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                if (!isLoading) {
+                    displayPhotos();
+                }
+            }
+        }, 200);
+    });
 
     // Načítání dat
     if (photoId) {
