@@ -125,50 +125,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Funkce pro otevření modálního okna
-    function openModal(imageUrl, currentIndex) {
-        const modal = document.getElementById("photo-modal");
-        const modalImage = document.getElementById("modal-image");
-        const closeModal = document.getElementById("close-modal");
+function openModal(imageUrl, currentIndex) {
+    const modal = document.getElementById("photo-modal");
+    const modalImage = document.getElementById("modal-image");
+    const closeModal = document.getElementById("close-modal");
 
-        modalImage.src = imageUrl;
-        modal.style.display = "block";
-        
-        // Nastavení maximální výšky fotky na 90vh
-        modalImage.style.maxHeight = "90vh";
-        modalImage.style.objectFit = "contain"; // Ujistí se, že fotka nebude deformována
+    modalImage.src = imageUrl;
+    modal.style.display = "block";
 
-        // Zavření modálního okna při kliknutí na křížek
-        closeModal.addEventListener("click", () => {
+    // Dynamické nastavení maximální výšky fotky na 93% výšky okna
+    const modalHeight = window.innerHeight * 0.93; // 93% výšky okna
+    modalImage.style.maxHeight = `${modalHeight}px`;
+    modalImage.style.width = "auto"; // Šířka se přizpůsobí, aby byl zachován poměr stran
+    modalImage.style.objectFit = "contain"; // Fotka se přizpůsobí bez deformace
+
+    // Centrování fotky do středu okna
+    modalImage.style.margin = "auto"; // Vycentrování horizontálně i vertikálně
+
+    // Zavření modálního okna při kliknutí na křížek
+    closeModal.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    // Zavření modálního okna při kliknutí mimo okno
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
             modal.style.display = "none";
-        });
+        }
+    });
 
-        // Zavření modálního okna při kliknutí mimo okno
-        window.addEventListener("click", (event) => {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        });
+    // Posun na předchozí nebo následující fotku při kliknutí na okraj
+    modalImage.addEventListener("click", (event) => {
+        if (event.offsetX < modalImage.width / 2) {
+            debounceMovePhoto(currentIndex, "prev"); // Levý okraj pro předchozí fotku
+        } else {
+            debounceMovePhoto(currentIndex, "next"); // Pravý okraj pro další fotku
+        }
+    });
 
-        // Posun na předchozí nebo následující fotku při kliknutí na okraj
-        modalImage.addEventListener("click", (event) => {
-            if (event.offsetX < modalImage.width / 2) {
-                debounceMovePhoto(currentIndex, "prev"); // Levý okraj pro předchozí fotku
-            } else {
-                debounceMovePhoto(currentIndex, "next"); // Pravý okraj pro další fotku
-            }
-        });
-
-        // Posun na předchozí nebo následující fotku pomocí kláves
-        window.addEventListener("keydown", (event) => {
-            if (event.key === "ArrowLeft") {
-                debounceMovePhoto(currentIndex, "prev");
-            } else if (event.key === "ArrowRight") {
-                debounceMovePhoto(currentIndex, "next");
-            } else if (event.key === "Escape") {
-                modal.style.display = "none"; // Zavření okna při Escape
-            }
-        });
-    }
+    // Posun na předchozí nebo následující fotku pomocí kláves
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft") {
+            debounceMovePhoto(currentIndex, "prev");
+        } else if (event.key === "ArrowRight") {
+            debounceMovePhoto(currentIndex, "next");
+        } else if (event.key === "Escape") {
+            modal.style.display = "none"; // Zavření okna při Escape
+        }
+    });
+}
 
     // Debounce pro efektivní posouvání mezi fotkami
     let debounceTimerModal;
