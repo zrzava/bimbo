@@ -16,9 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const blogs = ["bimbois.tumblr.com"];
     let allPhotos = [];
     let loadedPhotos = 0;
-    const photosPerLoad = 20; // Počet fotek na jednu dávku
+    const photosPerLoad = 20;
     let isLoading = false;
-    let totalFetched = 0; // Počet už načtených fotek
+    let currentPage = 1; // Tracking current page for pagination
 
     // Funkce pro aktualizaci titulku stránky
     function updatePageTitle() {
@@ -83,23 +83,23 @@ document.addEventListener("DOMContentLoaded", () => {
         return photos;
     }
 
-    // Načítání fotek z Tumblr API
-    async function fetchTumblrPhotos() {
+    // Načítání fotek z Tumblr API s stránkováním
+    async function fetchTumblrPhotos(page = 1) {
         if (isLoading) return;
         isLoading = true;
 
         try {
             let responses = await Promise.all(
-                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=${photosPerLoad}&offset=${totalFetched}`))
+                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=${photosPerLoad}&offset=${(page - 1) * photosPerLoad}`))
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
             data.forEach(blogData => {
-                const newPhotos = blogData.response.posts.flatMap(extractImages);
-                allPhotos.push(...newPhotos);
+                blogData.response.posts.forEach(post => {
+                    const photos = extractImages(post);
+                    allPhotos.push(...photos);
+                });
             });
-
-            totalFetched += data[0].response.posts.length;
 
             updateFilters();
             displayPhotos();
@@ -240,10 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function onScroll() {
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
             if (loadedPhotos < getFilteredPhotos().length && !isLoading) {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    displayPhotos(); // Načíst další fotky s debounce
-                }, 200);
+                currentPage++;
+                fetchTumblrPhotos(currentPage); // Načíst další fotky pro novou stránku
             }
         }
     }
