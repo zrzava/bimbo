@@ -189,6 +189,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 history.pushState(null, "", window.location.pathname); // Reset URL při zavření okna
             }
         });
+
+        // Ovládání fotek pomocí šipek
+        document.addEventListener("keydown", (event) => {
+            if (modal.style.display === "block") {
+                if (event.key === "ArrowLeft") {
+                    changePhoto(-1);
+                } else if (event.key === "ArrowRight") {
+                    changePhoto(1);
+                } else if (event.key === "Escape") {
+                    modal.style.display = "none";
+                    history.pushState(null, "", window.location.pathname); // Reset URL při zavření okna
+                }
+            }
+        });
+    }
+
+    // Funkce pro změnu fotky (na základě směru)
+    function changePhoto(direction) {
+        const currentIndex = allPhotos.findIndex(p => p.id === photoId);
+        if (currentIndex === -1) return;
+
+        const nextIndex = currentIndex + direction;
+        if (nextIndex >= 0 && nextIndex < allPhotos.length) {
+            const nextPhoto = allPhotos[nextIndex];
+            openModal(nextPhoto.id); // Otevře novou fotku
+        }
     }
 
     // Debounce pro efektivní scrollování
