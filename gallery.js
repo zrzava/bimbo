@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const photosPerLoad = 20;
     let isLoading = false;
 
-    // Nastavení title podle URL parametrů
+    // Funkce pro aktualizaci titulku stránky
     function updatePageTitle() {
         if (photoId && tagFilter) {
             document.title = `Photo from #${tagFilter} on Zrzava.com`;
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Aktualizace meta tagů
+    // Funkce pro aktualizaci meta tagů
     function updateMetaTags() {
         const metaDescription = document.querySelector("meta[name='description']");
         const metaKeywords = document.querySelector("meta[name='keywords']");
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return photos;
     }
 
-    // Načtení fotek z Tumblr API
+    // Načítání fotek z Tumblr API
     async function fetchTumblrPhotos() {
         if (isLoading) return;
         isLoading = true;
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateFilters() {
         filtersContainer.innerHTML = "";
         Object.keys(hashtags).forEach(tag => {
-            const count = getFilteredPhotos().filter(photo => photo.tags.includes(tag)).length;
+            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length;
             if (count > 0) {
                 let filterLink = document.createElement("a");
                 filterLink.href = `index.html?tag=${tag}`;
@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("scroll", () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+            if (!isLoading && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
                 if (!isLoading) {
                     displayPhotos();
                 }
