@@ -30,8 +30,8 @@
 }
 
 .gallery-image {
-    width: 150px; /* Pevná šířka */
-    height: 225px; /* Poměr 2:3 (200 * 1.5) */
+    width: 180px; /* Pevná šířka */
+    height: 270px; /* Poměr 2:3 (200 * 1.5) */
     object-fit: cover; /* Oříznutí obrázku, aby vyplnil daný rozměr */
     object-position: center; /* Zajištění, že střed obrázku zůstane viditelný */
     margin: 10px;
