@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
             img.alt = `Photo from #${tagFilter}`;
             img.classList.add("gallery-image");
             img.addEventListener("click", () => {
-                window.location.href = `index.html?tag=${tagFilter}&photo=${photo.id}`;
+                openModal(photo.url); // Otevření modálního okna při kliknutí na fotku
             });
 
             galleryContainer.appendChild(img);
@@ -168,74 +168,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Zobrazení samostatné fotky
-    function displaySinglePhoto() {
-        if (!photoId) {
-            console.error("❌ No photoId in URL");
-            return;
-        }
+    // Funkce pro otevření modálního okna
+    function openModal(imageUrl) {
+        const modal = document.getElementById("photo-modal");
+        const modalImage = document.getElementById("modal-image");
+        const closeModal = document.getElementById("close-modal");
 
-        // Logujeme photoId pro kontrolu
-        console.log("📸 Looking for photo with ID:", photoId);
+        modalImage.src = imageUrl; // Nastavení URL fotky do modálního okna
+        modal.style.display = "block"; // Zobrazení modálního okna
 
-        // Najít fotku podle ID z URL
-        let photo = allPhotos.find(p => p.id === photoId);
+        // Zavření modálního okna při kliknutí na křížek
+        closeModal.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
 
-        // Pokud fotka není nalezena, vypíšeme chybu
-        if (!photo) {
-            console.error(`❌ Photo with ID ${photoId} not found in allPhotos`);
-            return;
-        }
-
-        // Zkontroluj detaily fotky
-        console.log("📸 Found photo details:", photo);
-
-        // Vymazání obsahu galerie
-        galleryContainer.innerHTML = "";
-
-        // Vytvoření img elementu pro zobrazení fotky
-        let img = document.createElement("img");
-        img.src = photo.url;  // Zde bude URL fotky
-        img.style.maxHeight = "90vh";
-        img.alt = `Photo from #${tagFilter}`;
-        galleryContainer.appendChild(img);
-
-        // Vytvoření navigace (odkazy na předchozí a následující fotku)
-        let navContainer = document.createElement("div");
-        navContainer.classList.add("photo-navigation");
-
-        // Odkaz zpět do galerie
-        let backLink = document.createElement("a");
-        backLink.href = `index.html?tag=${tagFilter}`;
-        backLink.textContent = "Back to Gallery";
-        navContainer.appendChild(backLink);
-
-        // Odkaz na předchozí fotku
-        let prevPhotoIndex = allPhotos.findIndex(p => p.id === photoId) - 1;
-        if (prevPhotoIndex >= 0) {
-            let prevLink = document.createElement("a");
-            prevLink.href = `index.html?tag=${tagFilter}&photo=${allPhotos[prevPhotoIndex].id}`;
-            prevLink.textContent = "← Previous";
-            navContainer.insertBefore(prevLink, backLink);
-        }
-
-        // Odkaz na následující fotku
-        let nextPhotoIndex = allPhotos.findIndex(p => p.id === photoId) + 1;
-        if (nextPhotoIndex < allPhotos.length) {
-            let nextLink = document.createElement("a");
-            nextLink.href = `index.html?tag=${tagFilter}&photo=${allPhotos[nextPhotoIndex].id}`;
-            nextLink.textContent = "Next →";
-            navContainer.appendChild(nextLink);
-        }
-
-        // Přidání navigace do galerie
-        galleryContainer.appendChild(navContainer);
+        // Zavření modálního okna při kliknutí mimo okno
+        window.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
     }
 
     // Načítání dat
-    if (photoId) {
-        displaySinglePhoto();
-    } else {
-        fetchTumblrPhotos();
-    }
+    fetchTumblrPhotos();
 });
