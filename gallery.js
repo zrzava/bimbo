@@ -186,27 +186,32 @@ function displaySinglePhoto() {
         return;
     }
 
-    // Najít fotku podle ID
+    // Logujeme photoId pro kontrolu
+    console.log("📸 Looking for photo with ID:", photoId);
+
+    // Najít fotku podle ID z URL
     let photo = allPhotos.find(p => p.id === photoId);
+
+    // Pokud fotka není nalezena, vypíšeme chybu
     if (!photo) {
         console.error(`❌ Photo with ID ${photoId} not found in allPhotos`);
         return;
     }
 
-    // Zkontroluj URL fotky
-    console.log("📸 Photo details:", photo);
+    // Zkontroluj detaily fotky
+    console.log("📸 Found photo details:", photo);
 
-    // Vymazat obsah galerie
+    // Vymazání obsahu galerie
     galleryContainer.innerHTML = "";
 
-    // Vytvořit img element pro zobrazení fotky
+    // Vytvoření img elementu pro zobrazení fotky
     let img = document.createElement("img");
     img.src = photo.url;  // Zde bude URL fotky
     img.style.maxHeight = "90vh";
     img.alt = `Photo from #${tagFilter}`;
     galleryContainer.appendChild(img);
 
-    // Vytvoření navigace
+    // Vytvoření navigace (odkazy na předchozí a následující fotku)
     let navContainer = document.createElement("div");
     navContainer.classList.add("photo-navigation");
 
@@ -217,19 +222,19 @@ function displaySinglePhoto() {
     navContainer.appendChild(backLink);
 
     // Odkaz na předchozí fotku
-    let prevPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) - 1];
-    if (prevPhoto) {
+    let prevPhotoIndex = allPhotos.findIndex(p => p.id === photoId) - 1;
+    if (prevPhotoIndex >= 0) {
         let prevLink = document.createElement("a");
-        prevLink.href = `index.html?tag=${tagFilter}&photo=${prevPhoto.id}`;
+        prevLink.href = `index.html?tag=${tagFilter}&photo=${allPhotos[prevPhotoIndex].id}`;
         prevLink.textContent = "← Previous";
         navContainer.insertBefore(prevLink, backLink);
     }
 
     // Odkaz na následující fotku
-    let nextPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) + 1];
-    if (nextPhoto) {
+    let nextPhotoIndex = allPhotos.findIndex(p => p.id === photoId) + 1;
+    if (nextPhotoIndex < allPhotos.length) {
         let nextLink = document.createElement("a");
-        nextLink.href = `index.html?tag=${tagFilter}&photo=${nextPhoto.id}`;
+        nextLink.href = `index.html?tag=${tagFilter}&photo=${allPhotos[nextPhotoIndex].id}`;
         nextLink.textContent = "Next →";
         navContainer.appendChild(nextLink);
     }
