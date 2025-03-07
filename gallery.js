@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (post.photos) {
             post.photos.forEach(photo => {
                 photos.push({
-                    id: post.id,
+                    id: post.id,  // Používáme post.id jako pevné ID fotky
                     url: photo.original_size.url,
                     tags: post.tags
                 });
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let match;
             while (match = regex.exec(post.body)) {
                 photos.push({
-                    id: post.id,
+                    id: post.id,  // Používáme post.id jako pevné ID fotky
                     url: match[1],
                     tags: post.tags
                 });
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (post.reblogged_from_post && post.reblogged_from_post.photos) {
             post.reblogged_from_post.photos.forEach(photo => {
                 photos.push({
-                    id: post.id,
+                    id: post.id,  // Používáme post.id jako pevné ID fotky
                     url: photo.original_size.url,
                     tags: post.tags
                 });
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
             img.alt = `Photo from #${tagFilter}`;
             img.classList.add("gallery-image");
             img.addEventListener("click", () => {
-                openModal(photo.url, visiblePhotos.indexOf(photo)); // Otevření modálního okna při kliknutí na fotku
+                openModal(photo.id); // Otevření modálního okna při kliknutí na fotku
             });
 
             galleryContainer.appendChild(img);
@@ -154,12 +154,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Funkce pro otevření modálního okna
-    function openModal(imageUrl, currentIndex) {
+    function openModal(photoId) {
         const modal = document.getElementById("photo-modal");
         const modalImage = document.getElementById("modal-image");
         const closeModal = document.getElementById("close-modal");
 
-        modalImage.src = imageUrl;
+        const photo = allPhotos.find(p => p.id === photoId); // Najdeme fotku podle jejího ID
+
+        if (!photo) return;
+
+        modalImage.src = photo.url;
         modal.style.display = "block";
 
         // Nastavení maximální výšky fotky na 95vh a její centrování
@@ -170,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.style.justifyContent = "center"; // Horizontální centrování
 
         // Změna URL v prohlížeči s ID fotky
-        history.pushState(null, "", `?photo=${currentIndex}`);
+        history.pushState(null, "", `?photo=${photoId}`);
 
         // Zavření modálního okna při kliknutí na křížek
         closeModal.addEventListener("click", () => {
@@ -185,57 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 history.pushState(null, "", window.location.pathname); // Reset URL při zavření okna
             }
         });
-
-        // Posun na předchozí nebo následující fotku při kliknutí na okraj
-        modalImage.addEventListener("click", (event) => {
-            if (event.offsetX < modalImage.width / 2) {
-                debounceMovePhoto(currentIndex, "prev"); // Levý okraj pro předchozí fotku
-            } else {
-                debounceMovePhoto(currentIndex, "next"); // Pravý okraj pro další fotku
-            }
-        });
-
-        // Posun na předchozí nebo následující fotku pomocí kláves
-        window.addEventListener("keydown", (event) => {
-            if (event.key === "ArrowLeft") {
-                debounceMovePhoto(currentIndex, "prev");
-            } else if (event.key === "ArrowRight") {
-                debounceMovePhoto(currentIndex, "next");
-            } else if (event.key === "Escape") {
-                modal.style.display = "none"; // Zavření okna při Escape
-                history.pushState(null, "", window.location.pathname); // Reset URL při zavření okna
-            }
-        });
-    }
-
-    // Debounce pro efektivní posouvání mezi fotkami
-    let debounceTimerModal;
-    const debounceDelay = 200; // Časová prodleva mezi změnami fotek
-
-    function debounceMovePhoto(currentIndex, direction) {
-        clearTimeout(debounceTimerModal); // Zastavit předchozí volání
-
-        debounceTimerModal = setTimeout(() => {
-            if (direction === "prev") {
-                showPreviousPhoto(currentIndex); // Zobrazení předchozí fotky
-            } else if (direction === "next") {
-                showNextPhoto(currentIndex); // Zobrazení následující fotky
-            }
-        }, debounceDelay); // Prodleva mezi akcemi
-    }
-
-    // Funkce pro zobrazení předchozí fotky
-    function showPreviousPhoto(currentIndex) {
-        const visiblePhotos = getFilteredPhotos();
-        const previousIndex = (currentIndex - 1 + visiblePhotos.length) % visiblePhotos.length;
-        openModal(visiblePhotos[previousIndex].url, previousIndex);
-    }
-
-    // Funkce pro zobrazení další fotky
-    function showNextPhoto(currentIndex) {
-        const visiblePhotos = getFilteredPhotos();
-        const nextIndex = (currentIndex + 1) % visiblePhotos.length;
-        openModal(visiblePhotos[nextIndex].url, nextIndex);
     }
 
     // Debounce pro efektivní scrollování
