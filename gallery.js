@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const galleryContainer = document.getElementById("gallery");
     const filtersContainer = document.getElementById("filters");
-    const titleElement = document.title;
     const params = new URLSearchParams(window.location.search);
     const tagFilter = params.get("tag") || "";
     const photoId = params.get("photo") || "";
@@ -46,8 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Funkce pro extrakci obrázků z příspěvků
     function extractImages(post) {
         let photos = [];
-
-        // Pokud příspěvek obsahuje fotky, přidej je
         if (post.photos) {
             post.photos.forEach(photo => {
                 photos.push({
@@ -57,31 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
         }
-
-        // Pokud příspěvek obsahuje obrázky v těle textu
-        if (post.body) {
-            let regex = /<img[^>]+src="([^">]+)"/g;
-            let match;
-            while (match = regex.exec(post.body)) {
-                photos.push({
-                    id: post.id,
-                    url: match[1],
-                    tags: post.tags
-                });
-            }
-        }
-
-        // Pokud je příspěvek reblog, přidej i obrázky z reblogu
-        if (post.reblogged_from_post && post.reblogged_from_post.photos) {
-            post.reblogged_from_post.photos.forEach(photo => {
-                photos.push({
-                    id: post.id,
-                    url: photo.original_size.url,
-                    tags: post.tags
-                });
-            });
-        }
-
         return photos;
     }
 
@@ -92,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             let responses = await Promise.all(
-                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=20`))
+                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YOUR_API_KEY&limit=20`))
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
@@ -132,12 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 filtersContainer.appendChild(document.createTextNode(" • "));
             }
         });
-
-        // Přidání odkazu na Gabbie's Photos
-        let gabbieLink = document.createElement("a");
-        gabbieLink.href = "https://zrzava.com/?shop=pictures";
-        gabbieLink.textContent = "Gabbie's Photos";
-        filtersContainer.appendChild(gabbieLink);
     }
 
     // Zobrazení fotek v galerii
@@ -208,19 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         galleryContainer.appendChild(navContainer);
     }
-
-    // Debounce pro scrollování
-    let debounceTimer;
-    window.addEventListener("scroll", () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            if (!isLoading && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-                if (!isLoading) {
-                    displayPhotos();
-                }
-            }
-        }, 200);
-    });
 
     // Načítání dat
     if (photoId) {
