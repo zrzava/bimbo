@@ -122,7 +122,12 @@ function showShowMoreButton() {
         document.body.appendChild(showMoreContainer); // Přidáme na konec stránky
     }
 
+    // Zkontrolujeme, jestli tlačítko už neexistuje
+    let existingButton = document.getElementById("show-more-button");
+    if (existingButton) return; // Pokud už existuje, ukončíme funkci
+
     let showMoreButton = document.createElement("button");
+    showMoreButton.id = "show-more-button"; // Přidáme ID pro kontrolu
     showMoreButton.textContent = "Show More";
     showMoreButton.classList.add("show-more-button");
     showMoreButton.style.padding = "10px 20px";
@@ -135,9 +140,12 @@ function showShowMoreButton() {
         currentPage++;
         canLoadMore = true; // Povolit automatické načítání
         fetchTumblrPhotos(currentPage);
-        showMoreButton.remove(); // Po kliknutí tlačítko odstraníme
+        
+        // Po kliku tlačítko odstraníme a už ho znovu nevytváříme
+        showMoreButton.remove();
     });
 }
+
 
 
     // Funkce pro otevření modálního okna
