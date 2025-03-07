@@ -122,11 +122,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateFilters() {
         filtersContainer.innerHTML = "";
         Object.keys(hashtags).forEach(tag => {
-            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length;
+            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length; // Počet fotek pro filtr
             if (count > 0) {
                 let filterLink = document.createElement("a");
                 filterLink.href = `index.html?tag=${tag}`;
-                filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count})`;
+                filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count})`; // Zobrazí všechny fotky pro daný filtr
                 filtersContainer.appendChild(filterLink);
                 filtersContainer.appendChild(document.createTextNode(" • "));
             }
