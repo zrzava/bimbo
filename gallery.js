@@ -1,21 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
     const galleryContainer = document.getElementById("gallery");
-    const filtersContainer = document.getElementById("filters");
     const titleElement = document.title;
     const params = new URLSearchParams(window.location.search);
-    const tagFilter = params.get("tag") || "";
     const photoId = params.get("photo") || "";
 
-    const hashtags = {
-        "bimbo girl": { description: "Sexy and glamorous bimbo looks.", keywords: "bimbo, blonde, sexy, glamour" },
-        "transgirl": { description: "Beautiful and confident trans women.", keywords: "trans, transgirls, mtf, transgender" },
-        "smoking girl": { description: "Beautiful smoking girls.", keywords: "smoking girl, smoking fetish, smoking, cigarette" },
-        "details": { description: "Close-up shots and detailed captures.", keywords: "details, fashion, accessories" }
-    };
-
-    const blogs = ["bimbois.tumblr.com"];
     let allPhotos = [];
-    let filteredPhotos = [];
     let loadedPhotos = 0;
     const photosPerLoad = 20;
     let isLoading = false;
@@ -24,25 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Funkce pro aktualizaci titulku stránky
     function updatePageTitle() {
-        if (photoId && tagFilter) {
-            document.title = `Photo from #${tagFilter} on Zrzava.com`;
-        } else if (tagFilter) {
-            document.title = `Gallery of #${tagFilter} on Zrzava.com`;
+        if (photoId) {
+            document.title = `Photo from Zrzava.com`;
         } else {
             document.title = `Gallery on Zrzava.com`;
-        }
-    }
-
-    // Funkce pro aktualizaci meta tagů
-    function updateMetaTags() {
-        const metaDescription = document.querySelector("meta[name='description']");
-        const metaKeywords = document.querySelector("meta[name='keywords']");
-        if (hashtags[tagFilter]) {
-            metaDescription.content = hashtags[tagFilter].description;
-            metaKeywords.content = hashtags[tagFilter].keywords;
-        } else {
-            metaDescription.content = "Explore beautiful bimbo galleries on Zrzava.com.";
-            metaKeywords.content = "gallery, photos, fashion, lifestyle";
         }
     }
 
@@ -54,8 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             post.photos.forEach(photo => {
                 photos.push({
                     id: post.id,
-                    url: photo.original_size.url,
-                    tags: post.tags
+                    url: photo.original_size.url
                 });
             });
         }
@@ -66,8 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
             while (match = regex.exec(post.body)) {
                 photos.push({
                     id: post.id,
-                    url: match[1],
-                    tags: post.tags
+                    url: match[1]
                 });
             }
         }
@@ -76,8 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
             post.reblogged_from_post.photos.forEach(photo => {
                 photos.push({
                     id: post.id,
-                    url: photo.original_size.url,
-                    tags: post.tags
+                    url: photo.original_size.url
                 });
             });
         }
@@ -92,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             let responses = await Promise.all(
-                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=${photosPerLoad}&offset=${(page - 1) * photosPerLoad}`))
+                ["bimbois.tumblr.com"].map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=${photosPerLoad}&offset=${(page - 1) * photosPerLoad}`))
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
@@ -103,12 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
 
-            // Filtrování fotek podle aktuálního filtru
-            filteredPhotos = getFilteredPhotos();
-            updateFilters();
             displayPhotos();
             updatePageTitle();
-            updateMetaTags();
         } catch (error) {
             console.error("❌ Error fetching Tumblr data:", error);
         }
@@ -116,39 +83,16 @@ document.addEventListener("DOMContentLoaded", () => {
         isLoading = false;
     }
 
-    // Filtrování fotek podle tagu
-    function getFilteredPhotos() {
-        if (!tagFilter) return allPhotos;
-        return allPhotos.filter(photo => photo.tags.includes(tagFilter));
-    }
-
-    // Zobrazení filtrů
-    function updateFilters() {
-        filtersContainer.innerHTML = "";
-        Object.keys(hashtags).forEach(tag => {
-            let filterLink = document.createElement("a");
-            filterLink.href = `index.html?tag=${tag}`;
-            filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)}`; // Zobrazí tag
-            filtersContainer.appendChild(filterLink);
-            filtersContainer.appendChild(document.createTextNode(" • "));
-        });
-
-        let gabbieLink = document.createElement("a");
-        gabbieLink.href = "https://zrzava.com/?shop=pictures";
-        gabbieLink.textContent = "Gabbie's Photos";
-        filtersContainer.appendChild(gabbieLink);
-    }
-
     // Zobrazení fotek v galerii
     function displayPhotos() {
         galleryContainer.innerHTML = "";
 
-        const visiblePhotos = filteredPhotos.slice(0, loadedPhotos + photosPerLoad);
+        const visiblePhotos = allPhotos.slice(0, loadedPhotos + photosPerLoad);
         visiblePhotos.forEach(photo => {
             let img = document.createElement("img");
             img.src = photo.url;
             img.loading = "lazy"; // Lazy loading fotky
-            img.alt = `Photo from #${tagFilter}`;
+            img.alt = "Photo from Zrzava.com";
             img.classList.add("gallery-image");
             img.addEventListener("click", () => {
                 openModal(photo.url, visiblePhotos.indexOf(photo)); // Otevření modálního okna při kliknutí na fotku
@@ -160,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadedPhotos += photosPerLoad;
 
         // Pokud už byly všechny fotky načteny, přidáme "Show more" tlačítko
-        if (loadedPhotos < filteredPhotos.length) {
+        if (loadedPhotos < allPhotos.length) {
             showShowMoreButton();
         }
     }
@@ -244,14 +188,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Funkce pro zobrazení předchozí fotky
     function showPreviousPhoto(currentIndex) {
-        const visiblePhotos = filteredPhotos;
+        const visiblePhotos = allPhotos;
         const previousIndex = (currentIndex - 1 + visiblePhotos.length) % visiblePhotos.length;
         openModal(visiblePhotos[previousIndex].url, previousIndex);
     }
 
     // Funkce pro zobrazení další fotky
     function showNextPhoto(currentIndex) {
-        const visiblePhotos = filteredPhotos;
+        const visiblePhotos = allPhotos;
         const nextIndex = (currentIndex + 1) % visiblePhotos.length;
         openModal(visiblePhotos[nextIndex].url, nextIndex);
     }
@@ -260,9 +204,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let debounceTimer;
     function onScroll() {
         if (canLoadMore && window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-            if (loadedPhotos < filteredPhotos.length && !isLoading) {
+            if (loadedPhotos < allPhotos.length && !isLoading) {
                 currentPage++;
-                fetchTumblrPhotos(currentPage); // Načíst další fotky pro novou stránku, které odpovídají filtru
+                fetchTumblrPhotos(currentPage); // Načíst další fotky pro novou stránku
             }
         }
     }
