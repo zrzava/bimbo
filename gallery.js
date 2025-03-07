@@ -181,18 +181,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Zobrazení samostatné fotky
 function displaySinglePhoto() {
-    if (!photoId) return;
+    if (!photoId) {
+        console.error("❌ No photoId in URL");
+        return;
+    }
 
     // Najít fotku podle ID
     let photo = allPhotos.find(p => p.id === photoId);
-    if (!photo) return;
+    if (!photo) {
+        console.error(`❌ Photo with ID ${photoId} not found in allPhotos`);
+        return;
+    }
+
+    // Zkontroluj URL fotky
+    console.log("📸 Photo details:", photo);
 
     // Vymazat obsah galerie
     galleryContainer.innerHTML = "";
 
     // Vytvořit img element pro zobrazení fotky
     let img = document.createElement("img");
-    img.src = photo.url;  // Zde bude URL fotky, kterou jste získali z Tumblr API nebo přímého URL v body
+    img.src = photo.url;  // Zde bude URL fotky
     img.style.maxHeight = "90vh";
     img.alt = `Photo from #${tagFilter}`;
     galleryContainer.appendChild(img);
@@ -228,6 +237,7 @@ function displaySinglePhoto() {
     // Přidání navigace do galerie
     galleryContainer.appendChild(navContainer);
 }
+
 
 
 
