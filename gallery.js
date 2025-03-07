@@ -19,18 +19,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const photosPerLoad = 20;
     let isLoading = false;
 
-    // Funkce pro aktualizaci titulku stránky
+    // Nastavení title podle URL parametrů
     function updatePageTitle() {
         if (photoId && tagFilter) {
-            document.title = Photo from #${tagFilter} on Zrzava.com;
+            document.title = `Photo from #${tagFilter} on Zrzava.com`;
         } else if (tagFilter) {
-            document.title = Gallery of #${tagFilter} on Zrzava.com;
+            document.title = `Gallery of #${tagFilter} on Zrzava.com`;
         } else {
-            document.title = Gallery on Zrzava.com;
+            document.title = `Gallery on Zrzava.com`;
         }
     }
 
-    // Funkce pro aktualizaci meta tagů
+    // Aktualizace meta tagů
     function updateMetaTags() {
         const metaDescription = document.querySelector("meta[name='description']");
         const metaKeywords = document.querySelector("meta[name='keywords']");
@@ -85,14 +85,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return photos;
     }
 
-    // Načítání fotek z Tumblr API
+    // Načtení fotek z Tumblr API
     async function fetchTumblrPhotos() {
         if (isLoading) return;
         isLoading = true;
 
         try {
             let responses = await Promise.all(
-                blogs.map(blog => fetch(https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=20))
+                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=20`))
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
@@ -123,11 +123,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateFilters() {
         filtersContainer.innerHTML = "";
         Object.keys(hashtags).forEach(tag => {
-            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length;
+            const count = getFilteredPhotos().filter(photo => photo.tags.includes(tag)).length;
             if (count > 0) {
                 let filterLink = document.createElement("a");
-                filterLink.href = index.html?tag=${tag};
-                filterLink.textContent = ${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count});
+                filterLink.href = `index.html?tag=${tag}`;
+                filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count})`;
                 filtersContainer.appendChild(filterLink);
                 filtersContainer.appendChild(document.createTextNode(" • "));
             }
@@ -149,10 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
             let img = document.createElement("img");
             img.src = photo.url;
             img.loading = "lazy";
-            img.alt = Photo from #${tagFilter};
+            img.alt = `Photo from #${tagFilter}`;
             img.classList.add("gallery-image");
             img.addEventListener("click", () => {
-                window.location.href = index.html?tag=${tagFilter}&photo=${photo.id};
+                window.location.href = `index.html?tag=${tagFilter}&photo=${photo.id}`;
             });
 
             galleryContainer.appendChild(img);
@@ -179,21 +179,21 @@ document.addEventListener("DOMContentLoaded", () => {
         let img = document.createElement("img");
         img.src = photo.url;
         img.style.maxHeight = "90vh";
-        img.alt = Photo from #${tagFilter};
+        img.alt = `Photo from #${tagFilter}`;
         galleryContainer.appendChild(img);
 
         let navContainer = document.createElement("div");
         navContainer.classList.add("photo-navigation");
 
         let backLink = document.createElement("a");
-        backLink.href = index.html?tag=${tagFilter};
+        backLink.href = `index.html?tag=${tagFilter}`;
         backLink.textContent = "Back to Gallery";
         navContainer.appendChild(backLink);
 
         let prevPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) - 1];
         if (prevPhoto) {
             let prevLink = document.createElement("a");
-            prevLink.href = index.html?tag=${tagFilter}&photo=${prevPhoto.id};
+            prevLink.href = `index.html?tag=${tagFilter}&photo=${prevPhoto.id}`;
             prevLink.textContent = "← Previous";
             navContainer.insertBefore(prevLink, backLink);
         }
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let nextPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) + 1];
         if (nextPhoto) {
             let nextLink = document.createElement("a");
-            nextLink.href = index.html?tag=${tagFilter}&photo=${nextPhoto.id};
+            nextLink.href = `index.html?tag=${tagFilter}&photo=${nextPhoto.id}`;
             nextLink.textContent = "Next →";
             navContainer.appendChild(nextLink);
         }
@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("scroll", () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            if (!isLoading && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
                 if (!isLoading) {
                     displayPhotos();
                 }
