@@ -29,25 +29,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             let data = await Promise.all(responses.map(res => res.json()));
 
             allPhotos = data.flatMap(blogData =>
-                blogData.response.posts?.flatMap(post =>
-                    post.photos?.map(photo => ({
+                (blogData.response.posts || []).flatMap(post =>
+                    (post.photos || []).map(photo => ({
                         id: post.id,
                         url: photo.original_size.url,
-                        tags: post.tags || []
+                        tags: post.tags || [] // OPRAVENO - pokud nejsou tagy, použije prázdné pole []
                     }))
-                ) || []
+                )
             );
-
-            if (allPhotos.length === 0) {
-                console.warn("❌ No photos found!");
-            }
 
             console.log("✅ Photos fetched:", allPhotos);
 
             updateFilters();
             displayPhotos();
         } catch (error) {
-            console.error("Error fetching Tumblr data:", error);
+            console.error("❌ Error fetching Tumblr data:", error);
         }
 
         isLoading = false;
@@ -57,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         filtersContainer.innerHTML = "";
 
         Object.keys(hashtags).forEach(tag => {
-            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length;
+            const count = allPhotos.filter(photo => photo.tags.includes(tag)).length; // OPRAVENO - teď nehrozí chyba
             if (count > 0) {
                 let filterLink = document.createElement("a");
                 filterLink.href = `index.html?tag=${tag}`;
