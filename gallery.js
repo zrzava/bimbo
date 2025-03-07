@@ -141,13 +141,11 @@ function openModal(imageUrl, currentIndex) {
 
     // Nastavení display na block a centrování fotky
     modalImage.style.display = "block"; // Zajištění, že fotka je blokový prvek pro centrování
-    modalImage.style.marginLeft = "auto"; // Vycentrování horizontálně
-    modalImage.style.marginRight = "auto"; // Vycentrování horizontálně
-    modalImage.style.marginTop = "auto"; // Vycentrování vertikálně
-    modalImage.style.marginBottom = "auto"; // Vycentrování vertikálně
+    modalImage.style.margin = "auto"; // Automatiké zarovnání horizontálně a vertikálně
     modalImage.style.position = "absolute"; // Absolutní pozicování pro centrování
     modalImage.style.top = "50%"; // Vertikální centrování
-    modalImage.style.transform = "translateY(-50%)"; // Posunutí pro perfektní centrování
+    modalImage.style.left = "50%"; // Horizontální centrování
+    modalImage.style.transform = "translate(-50%, -50%)"; // Posunutí fotky do středu
 
     // Zavření modálního okna při kliknutí na křížek
     closeModal.addEventListener("click", () => {
