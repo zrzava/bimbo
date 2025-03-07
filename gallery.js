@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const galleryContainer = document.getElementById("gallery");
     const filtersContainer = document.getElementById("filters");
+    const titleElement = document.title;
     const params = new URLSearchParams(window.location.search);
     const tagFilter = params.get("tag") || "";
     const photoId = params.get("photo") || "";
@@ -21,11 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Funkce pro aktualizaci titulku stránky
     function updatePageTitle() {
         if (photoId && tagFilter) {
-            document.title = `Photo from #${tagFilter} on Zrzava.com`;
+            document.title = Photo from #${tagFilter} on Zrzava.com;
         } else if (tagFilter) {
-            document.title = `Gallery of #${tagFilter} on Zrzava.com`;
+            document.title = Gallery of #${tagFilter} on Zrzava.com;
         } else {
-            document.title = `Gallery on Zrzava.com`;
+            document.title = Gallery on Zrzava.com;
         }
     }
 
@@ -45,6 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Funkce pro extrakci obrázků z příspěvků
     function extractImages(post) {
         let photos = [];
+
+        // Pokud příspěvek obsahuje fotky, přidej je
         if (post.photos) {
             post.photos.forEach(photo => {
                 photos.push({
@@ -54,6 +57,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
         }
+
+        // Pokud příspěvek obsahuje obrázky v těle textu
+        if (post.body) {
+            let regex = /<img[^>]+src="([^">]+)"/g;
+            let match;
+            while (match = regex.exec(post.body)) {
+                photos.push({
+                    id: post.id,
+                    url: match[1],
+                    tags: post.tags
+                });
+            }
+        }
+
+        // Pokud je příspěvek reblog, přidej i obrázky z reblogu
+        if (post.reblogged_from_post && post.reblogged_from_post.photos) {
+            post.reblogged_from_post.photos.forEach(photo => {
+                photos.push({
+                    id: post.id,
+                    url: photo.original_size.url,
+                    tags: post.tags
+                });
+            });
+        }
+
         return photos;
     }
 
@@ -64,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             let responses = await Promise.all(
-                blogs.map(blog => fetch(`https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=20`))
+                blogs.map(blog => fetch(https://api.tumblr.com/v2/blog/${blog}/posts/photo?api_key=YuwtkxS7sYF0DOW41yK2rBeZaTgcZWMHHNhi1TNXht3Pf7Lkdf&limit=20))
             );
             let data = await Promise.all(responses.map(res => res.json()));
 
@@ -98,12 +126,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const count = allPhotos.filter(photo => photo.tags.includes(tag)).length;
             if (count > 0) {
                 let filterLink = document.createElement("a");
-                filterLink.href = `index.html?tag=${tag}`;
-                filterLink.textContent = `${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count})`;
+                filterLink.href = index.html?tag=${tag};
+                filterLink.textContent = ${tag.charAt(0).toUpperCase() + tag.slice(1)} (${count});
                 filtersContainer.appendChild(filterLink);
                 filtersContainer.appendChild(document.createTextNode(" • "));
             }
         });
+
+        // Přidání odkazu na Gabbie's Photos
+        let gabbieLink = document.createElement("a");
+        gabbieLink.href = "https://zrzava.com/?shop=pictures";
+        gabbieLink.textContent = "Gabbie's Photos";
+        filtersContainer.appendChild(gabbieLink);
     }
 
     // Zobrazení fotek v galerii
@@ -115,10 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
             let img = document.createElement("img");
             img.src = photo.url;
             img.loading = "lazy";
-            img.alt = `Photo from #${tagFilter}`;
+            img.alt = Photo from #${tagFilter};
             img.classList.add("gallery-image");
             img.addEventListener("click", () => {
-                window.location.href = `index.html?tag=${tagFilter}&photo=${photo.id}`;
+                window.location.href = index.html?tag=${tagFilter}&photo=${photo.id};
             });
 
             galleryContainer.appendChild(img);
@@ -145,21 +179,21 @@ document.addEventListener("DOMContentLoaded", () => {
         let img = document.createElement("img");
         img.src = photo.url;
         img.style.maxHeight = "90vh";
-        img.alt = `Photo from #${tagFilter}`;
+        img.alt = Photo from #${tagFilter};
         galleryContainer.appendChild(img);
 
         let navContainer = document.createElement("div");
         navContainer.classList.add("photo-navigation");
 
         let backLink = document.createElement("a");
-        backLink.href = `index.html?tag=${tagFilter}`;
+        backLink.href = index.html?tag=${tagFilter};
         backLink.textContent = "Back to Gallery";
         navContainer.appendChild(backLink);
 
         let prevPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) - 1];
         if (prevPhoto) {
             let prevLink = document.createElement("a");
-            prevLink.href = `index.html?tag=${tagFilter}&photo=${prevPhoto.id}`;
+            prevLink.href = index.html?tag=${tagFilter}&photo=${prevPhoto.id};
             prevLink.textContent = "← Previous";
             navContainer.insertBefore(prevLink, backLink);
         }
@@ -167,13 +201,26 @@ document.addEventListener("DOMContentLoaded", () => {
         let nextPhoto = allPhotos[allPhotos.findIndex(p => p.id === photoId) + 1];
         if (nextPhoto) {
             let nextLink = document.createElement("a");
-            nextLink.href = `index.html?tag=${tagFilter}&photo=${nextPhoto.id}`;
+            nextLink.href = index.html?tag=${tagFilter}&photo=${nextPhoto.id};
             nextLink.textContent = "Next →";
             navContainer.appendChild(nextLink);
         }
 
         galleryContainer.appendChild(navContainer);
     }
+
+    // Debounce pro scrollování
+    let debounceTimer;
+    window.addEventListener("scroll", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (!isLoading && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                if (!isLoading) {
+                    displayPhotos();
+                }
+            }
+        }, 200);
+    });
 
     // Načítání dat
     if (photoId) {
