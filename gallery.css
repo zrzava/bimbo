@@ -1,0 +1,91 @@
+﻿body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    text-align: center;
+}
+
+#filters {
+    margin: 20px 0;
+    font-size: 16px;
+}
+
+#filters a {
+    text-decoration: none;
+    color: #ff4081;
+    margin: 0 8px;
+    font-weight: bold;
+}
+
+#filters a:hover {
+    text-decoration: underline;
+}
+
+#gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+}
+
+.gallery-image {
+    width: 250px;
+    height: auto;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.gallery-image:hover {
+    transform: scale(1.05);
+}
+
+button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #ff4081;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e03570;
+}
+
+/* Stylování samostatného zobrazení fotky */
+.photo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.photo-container img {
+    max-height: 90vh;
+    max-width: 90%;
+    border-radius: 8px;
+}
+
+.photo-navigation {
+    margin-top: 15px;
+    display: flex;
+    gap: 20px;
+}
+
+.photo-navigation a {
+    text-decoration: none;
+    color: #ff4081;
+    font-weight: bold;
+}
+
+.photo-navigation a:hover {
+    text-decoration: underline;
+}
+

@@ -3,52 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bimbo Website on Zrzava.com in Progress</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f9f9f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-        }
-        .container {
-            max-width: 800px;
-            padding: 20px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #ff5733;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 1rem;
-        }
-        a {
-            color: #1a73e8;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <meta name="description" content="Explore beautiful galleries on Zrzava.com.">
+    <meta name="keywords" content="gallery, photos, fashion, lifestyle">
+    <title>Gallery on Zrzava.com</title>
+    <link rel="stylesheet" href="gallery.css">
 </head>
 <body>
-<div class="container">
-    <h1>bimbo.zrzava.com</h1>
-    <p>(c) 2025 <a href="https://zrzava.com">zrzava.com</a></p>
-</div>
+
+    <h1 id="gallery-title">Gallery</h1>
+    <p id="gallery-description">Explore the latest photos from the gallery.</p>
+    <p id="gallery-updated">Last updated: <span id="last-updated">YYYY-MM-DD HH:MM UTC</span></p>
+
+    <nav id="filters"></nav>
+
+    <main id="gallery"></main>
+
+    <div id="photo-viewer" class="hidden">
+        <img id="photo-full" src="" alt="Photo">
+        <div class="photo-navigation">
+            <a id="prev-photo" href="#">← Previous</a>
+            <a id="back-to-gallery" href="gallery.html">Back to Gallery</a>
+            <a id="next-photo" href="#">Next →</a>
+        </div>
+    </div>
+
+    <script src="gallery.js"></script>
 </body>
 </html>
-
